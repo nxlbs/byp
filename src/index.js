@@ -87,7 +87,6 @@ app.use((req, res) => {
 if (process.env.NODE_ENV !== 'development') {
     let server = app.listen(port, async () => {
         console.log(`Server running on port ${port}`)
-        await utils.initialize();
     })
     try {
         server.timeout = global.timeOut

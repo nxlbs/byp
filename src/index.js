@@ -39,10 +39,12 @@ app.post('/action', async (req, res) => {
     
     if (data?.mode === "brat") {
         global.browserLength++
-        const result = await brat(data).then(res => { return { source: res, code: 200 } }).catch(err => { return { code: 500, message: err.message } })
+        const result = await brat(data)
         
         global.browserLength--
-        res.status(result.code ?? 500).send(result)
+        
+        res.set('Content-Type', 'image/png');
+        res.send(result)
         return;
     }
     

@@ -70,10 +70,6 @@ let desktopContext, mobileContext, desktopPage, mobilePage;
 
 const utils = {
     async createBrowserContext(type = 'desktop') {
-        if (!browser) {
-            await this.launchBrowser();
-        }
-
         if (type === 'desktop') {
             desktopContext = await browser.createBrowserContext();
             return desktopContext;

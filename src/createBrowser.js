@@ -5,7 +5,7 @@ async function createBrowser() {
 
         global.browser = null
 
-        console.log('Launching the browser...');
+        // console.log('Launching the browser...');
 
         const { browser } = await connect({
             headless: false,
@@ -18,7 +18,7 @@ async function createBrowser() {
 
         global.browser = browser;
         
-        console.log(browser)
+        // console.log(browser)
 
         browser.on('disconnected', async () => {
             if (global.finished == true) return

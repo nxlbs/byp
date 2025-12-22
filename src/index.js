@@ -19,8 +19,7 @@ if (process.env.NODE_ENV !== 'development') {
         server.timeout = global.timeOut
     } catch (e) { }
 }
-// if (process.env.SKIP_LAUNCH != 'true') 
-require('./createBrowser')
+if (process.env.SKIP_LAUNCH != 'true') require('./createBrowser')
 
 const getSource = require('./getSource')
 const solveTurnstileMin = require('./solveTurnstile.min')

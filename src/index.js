@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 7860
+const port = process.env.PORT || 8080
 const bodyParser = require('body-parser')
 const authToken = process.env.authToken || null
 const cors = require('cors')
@@ -13,15 +13,19 @@ global.timeOut = Number(process.env.timeOut || 60000)
 app.use(bodyParser.json({}))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
-
-
-if (process.env.SKIP_LAUNCH != 'true') require('./createBrowser')
+if (process.env.NODE_ENV !== 'development') {
+    let server = app.listen(port, () => { console.log(`Server running on port ${port}`) })
+    try {
+        server.timeout = global.timeOut
+    } catch (e) { }
+}
+// if (process.env.SKIP_LAUNCH != 'true') 
+require('./createBrowser')
 
 const getSource = require('./getSource')
 const solveTurnstileMin = require('./solveTurnstile.min')
 const solveTurnstileMax = require('./solveTurnstile.max')
 const wafSession = require('./wafSession')
-const brat = require('./brat')
 
 app.get("/", (req, res) => {
   res.send({ msg: "Hello World" })
@@ -31,26 +35,15 @@ app.post('/action', async (req, res) => {
 
     const data = req.body
 
+    const check = reqValidate(data)
+
+    if (check !== true) return res.status(400).json({ code: 400, message: 'Bad Request', schema: check })
+
     if (authToken && data.authToken !== authToken) return res.status(401).json({ code: 401, message: 'Unauthorized' })
 
     if (global.browserLength >= global.browserLimit) return res.status(429).json({ code: 429, message: 'Too Many Requests' })
 
     if (process.env.SKIP_LAUNCH != 'true' && !global.browser) return res.status(500).json({ code: 500, message: 'The scanner is not ready yet. Please try again a little later.' })
-    
-    if (data?.mode === "brat") {
-        global.browserLength++
-        const result = await brat(data)
-        
-        global.browserLength--
-        
-        res.set('Content-Type', 'image/png');
-        res.send(result)
-        return;
-    }
-    
-    const check = reqValidate(data)
-
-    if (check !== true) return res.status(400).json({ code: 400, message: 'Bad Request', schema: check })
 
     var result = { code: 500 }
 
@@ -76,23 +69,6 @@ app.post('/action', async (req, res) => {
     res.status(result.code ?? 500).send(result)
 })
 
-
-
-
-
-
-
-app.use((req, res) => {
-  res.status(404).json({ code: 404, message: 'Not Found' })
-})
-
-if (process.env.NODE_ENV !== 'development') {
-    let server = app.listen(port, async () => {
-        console.log(`Server running on port ${port}`)
-    })
-    try {
-        server.timeout = global.timeOut
-    } catch (e) { }
-}
+app.use((req, res) => { res.status(404).json({ code: 404, message: 'Not Found' }) })
 
 if (process.env.NODE_ENV == 'development') module.exports = app

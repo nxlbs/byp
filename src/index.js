@@ -100,8 +100,8 @@ app.post("/api/shorturl", links.create("sh"))
 app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
 
-app.get("/sh/:id", links.getlink())
-app.get("/storage/:id", links.getlink())
+app.get("/sh/:id", links.getprop())
+app.get("/storage/:id", links.getprop())
 
 
 

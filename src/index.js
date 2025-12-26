@@ -92,12 +92,21 @@ app.post('/action', async (req, res) => {
 })
 
 
-app.post("/api/shorturl", links.create("sh"))
-app.post("/api/shorturl2", links.create(["sh", "storage"]))
+app.post("/api/shorturl", (req, res) => {
+  return links.create("sh")(req, res)
+})
+// app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
-app.get("/sh/:id", links.getlink)
-app.get("/storage/:id", links.getlink)
+app.post("/api/shorturl2", (req, res) => {
+  return links.create(["sh", "storage"]))(req, res)
+})
 
+app.get("/sh/:id", (req, res) => {
+  links.getlink(req, res)
+})
+app.get("/storage/:id", (req, res) => {
+  links.getlink(req, res)
+})
 
 
 app.get("/", (req, res) => {

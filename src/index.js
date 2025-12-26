@@ -92,25 +92,20 @@ app.post('/action', async (req, res) => {
 })
 
 
-function crit(a, b, c) {
-  return links.create(c)(a, b)
-}
+// function crit(a, b, c) {
+  // return links.create(c)(a, b)
+// }
 
-app.post("/api/shorturl", (req, res) => {
-  return crit(req, res, "sh")
-})
+app.post("/api/shorturl", links.create("sh")(a, b))
+
 // app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
-app.post("/api/shorturl2", (req, res) => {
-  return crit(req, res, ["sh", "storage"])
-})
+app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
-app.get("/sh/:id", (req, res) => {
-  links.getlink(req, res)
-})
-app.get("/storage/:id", (req, res) => {
-  links.getlink(req, res)
-})
+
+app.get("/sh/:id", links.getlink)
+app.get("/storage/:id", links.getlink)
+
 
 
 app.get("/", (req, res) => {

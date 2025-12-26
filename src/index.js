@@ -26,8 +26,8 @@ try {
 } catch (e) {};
 
 
-
-const links = new Link()
+const mylink = {};
+const links = new Link(mylink)
 
 
 
@@ -92,13 +92,17 @@ app.post('/action', async (req, res) => {
 })
 
 
+function crit(a, b, c) {
+  return links.create(c)(a, b)
+}
+
 app.post("/api/shorturl", (req, res) => {
-  return links.create("sh")(req, res)
+  return crit(req, res, "sh")
 })
 // app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
 app.post("/api/shorturl2", (req, res) => {
-  return links.create(["sh", "storage"])(req, res)
+  return crit(req, res, ["sh", "storage"])
 })
 
 app.get("/sh/:id", (req, res) => {

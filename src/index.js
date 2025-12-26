@@ -96,7 +96,7 @@ app.post('/action', async (req, res) => {
   // return links.create(c)(a, b)
 // }
 
-app.post("/api/shorturl", links.create("sh")(a, b))
+app.post("/api/shorturl", links.create("sh"))
 
 // app.post("/api/shorturl2", links.create(["sh", "storage"]))
 

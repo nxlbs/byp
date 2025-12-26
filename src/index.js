@@ -26,8 +26,7 @@ try {
 } catch (e) {};
 
 
-const mylink = {};
-const links = new Link(mylink)
+const links = new Link()
 
 
 
@@ -100,8 +99,8 @@ app.post("/api/shorturl", links.create("sh"))
 app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
 
-app.get("/sh/:id", links.getprop())
-app.get("/storage/:id", links.getprop())
+app.get("/sh/:id", links.getlink())
+app.get("/storage/:id", links.getlink())
 
 
 

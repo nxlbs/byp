@@ -98,7 +98,7 @@ app.post("/api/shorturl", (req, res) => {
 // app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
 app.post("/api/shorturl2", (req, res) => {
-  return links.create(["sh", "storage"]))(req, res)
+  return links.create(["sh", "storage"])(req, res)
 })
 
 app.get("/sh/:id", (req, res) => {

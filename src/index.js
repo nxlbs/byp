@@ -8,7 +8,10 @@ const authToken = process.env.authToken || null
 const cors = require('cors')
 const reqValidate = require('./reqValidate')
 
-const Link = require("../lib/links.js")
+const Link = require("../lib/links")
+const wadl = require("../lib/WAMediaDownload")
+const up = require("../lib/uploader")
+
 
 global.browserLength = 0
 global.browserLimit = Number(process.env.browserLimit) || 20
@@ -101,6 +104,43 @@ app.post("/api/shorturl2", links.create(["sh", "storage"]))
 
 app.get("/sh/:id", links.getlink())
 app.get("/storage/:id", links.getlink())
+
+
+
+
+
+
+app.post("/api/v1/wamedia", async (req, res) => {
+  const { input, type, id } = req.body
+  if (!input && !type) return res.status(403).send(links.html('unauth')); 
+  
+  try {
+    const ree = await wadl({ ...input, type })
+  
+    const nn = await new Promise((resolve, reject) => {
+      const chunks = [];
+      ree.on('data', (chunk) => chunks.push(chunk));
+      ree.on('end', () => resolve(Buffer.concat(chunks)));
+      ree.on('error', (err) => reject(err));
+    });
+
+    const sh = await up.tmpfiles(nn)
+    
+    res.json({
+      status: true,
+      url: sh
+    });
+  } catch(e) {
+    res.json({
+      status: false,
+      msg: e.message
+    });
+  }
+})
+
+
+
+
 
 
 

@@ -124,7 +124,7 @@ app.post("/api/v1/wamedia", async (req, res) => {
       ree.on('error', (err) => reject(err));
     });
 
-    const sh = await up.tmpfiles(nn)
+    const sh = await up.reface(nn)
     
     res.json({
       status: true,

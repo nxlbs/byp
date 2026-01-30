@@ -38,7 +38,7 @@ function getQwenUidToken() {
             // Menunggu modul Baxia/FYModule dimuat
             await page.waitForFunction(
                 () => window.__baxia__ && window.__baxia__.getFYModule, 
-                { timeout: 20000 }
+                { timeout: 20  000 }
             );
 
             // Ekstraksi Token

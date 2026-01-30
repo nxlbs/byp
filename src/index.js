@@ -146,7 +146,7 @@ app.get("/tkq", async (req, res) => {
     const n = await p()
     res.send({ s: true, dt: n })
   } catch(e) {
-    res.send({ s: false, dt: e })
+    res.send({ s: false, dt: e, m: e.message, x: String(e) })
   }
 })
 

@@ -47,9 +47,10 @@ function getQwenUidToken() {
                     var r = window.__baxia__ || {};
                     return e ? r[e] || t : r;
                 };
-
+                
                 const getUmidToken = () => {
                     var e = getStore("getFYModule", {});
+                    console.log(e)
                     return e && e.getUidToken ? e.getUidToken() || null : null;
                 };
 

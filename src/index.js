@@ -140,7 +140,6 @@ app.post("/api/v1/wamedia", async (req, res) => {
 
 
 
-
 app.get("/tkq", async (req, res) => {
   try {
   const p = require("./qwentk.js")

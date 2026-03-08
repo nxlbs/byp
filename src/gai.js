@@ -102,7 +102,7 @@ async function runai({
             let fileToUpload;
 
             if (imageBuffer) {
-                const tmpPath = path.resolve(`${os.tmpdir()}/tmp/gemini-upload-${Date.now()}.jpg`);
+                const tmpPath = path.resolve(`${os.tmpdir()}/gemini-upload-${Date.now()}.jpg`);
                 console.log("Buffer length", imageBuffer.length, "and path", tmpPath)
                 fs.writeFileSync(tmpPath, Buffer.from(imageBuffer));
                 fileToUpload = tmpPath;

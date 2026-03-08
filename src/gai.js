@@ -102,7 +102,7 @@ async function runai({
         
         const dd = n.links.createShortlink({
             req: n.req,
-            type: "media2",
+            type: "temp",
             media: Buffer.from(ggg)
         })
         fallback.n = dd;

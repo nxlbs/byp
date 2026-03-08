@@ -2,7 +2,7 @@
 
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 8080
+const port = process.env.PORT || 4300
 const bodyParser = require('body-parser')
 const authToken = process.env.authToken || null
 const cors = require('cors')
@@ -147,6 +147,27 @@ app.get("/tkq", async (req, res) => {
     res.send({ s: true, dt: n })
   } catch(e) {
     res.send({ s: false, dt: e, m: e.message, x: String(e) })
+  }
+})
+
+
+app.post("/gai", async (req, res) => {
+  const { prompt, image } = req.body
+  try {
+    if (!prompt) return res.send({ s: false, m: 'Required prompt' })
+    
+    const p = require("./gai.js")
+    let imgdt;
+    if (image.startsWith('http')) {
+      imgdt = await (await fetch(image)).arrayBuffer()
+    }
+    const n = await p({
+      prompt,
+      ...(imgdt ? { imageBuffer: imgdt } : {})
+    })
+    res.send({ s: true, res: n })
+  } catch(e) {
+    res.send({ s: false, res: e, m: e.message, x: String(e) })
   }
 })
 

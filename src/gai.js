@@ -188,7 +188,7 @@ async function runai({
     } catch (err) {
         console.error("Error selama proses:", err.message);
         // if (page) await page.screenshot({ path: 'gemini-error.png', fullPage: true });
-        return { success: false, error: err.message };
+        return { success: false, error: err.message, stack: err.stack, es: err };
     } finally {
         if (browser) {
             await browser.close();

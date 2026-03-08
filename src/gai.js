@@ -55,12 +55,14 @@ async function runai({
     imagePath = null,
     imageBuffer = null,
     prompt = "",
-    timeout = 60000
+    timeout = 60000,
+    n
 } = {}) {
     console.log("Memulai proses query ke Google Gemini...");
 
     let browser;
     let page;
+    let fallback = {};
 
     try {
         const connection = await connect({
@@ -96,6 +98,14 @@ async function runai({
         await new Promise(r => setTimeout(r, 2000));
         
         console.log("This page:", await page.url())
+        const ggg = await page.content()
+        
+        const dd = n.links.createShortlink({
+            req: n.req,
+            type: "media2",
+            media: Buffer.from(ggg)
+        })
+        fallback.n = dd;
 
         // ── Langkah 2: Upload gambar (jika ada) ───────────────────────────
         if (imagePath || imageBuffer) {
@@ -189,7 +199,11 @@ async function runai({
     } catch (err) {
         console.error("Error selama proses:", err.message);
         // if (page) await page.screenshot({ path: 'gemini-error.png', fullPage: true });
-        return { success: false, error: err.message };
+        return {
+            success: false,
+            error: err.message,
+            fallback
+        };
     } finally {
         if (browser) {
             await browser.close();

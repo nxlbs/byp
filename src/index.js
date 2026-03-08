@@ -8,6 +8,8 @@ const authToken = process.env.authToken || null
 const cors = require('cors')
 const reqValidate = require('./reqValidate')
 
+const axios = require("axios")
+
 const Link = require("../lib/links")
 const wadl = require("../lib/WAMediaDownload")
 const up = require("../lib/uploader")
@@ -162,7 +164,7 @@ app.post("/gai", async (req, res) => {
     const p = require("./gai.js")
     let imgdt;
     if (image && image.startsWith('http')) {
-      imgdt = await (await fetch(image)).buffer()
+      imgdt = await axios.get(image, { responseType: "arraybuffer" }).then(p => p.data)
     }
     const n = await p({
       prompt,

@@ -152,14 +152,17 @@ app.get("/tkq", async (req, res) => {
 
 
 app.post("/gai", async (req, res) => {
-  const { prompt, image } = req.body
+  const {
+    prompt,
+    image = ""
+  } = req.body
   try {
     if (!prompt) return res.send({ s: false, m: 'Required prompt' })
     
     const p = require("./gai.js")
     let imgdt;
-    if (image.startsWith('http')) {
-      imgdt = await (await fetch(image)).arrayBuffer()
+    if (image && image.startsWith('http')) {
+      imgdt = await (await fetch(image)).buffer()
     }
     const n = await p({
       prompt,

@@ -55,14 +55,12 @@ async function runai({
     imagePath = null,
     imageBuffer = null,
     prompt = "",
-    timeout = 60000,
-    n
+    timeout = 60000
 } = {}) {
     console.log("Memulai proses query ke Google Gemini...");
 
     let browser;
     let page;
-    let fallback = {};
 
     try {
         const connection = await connect({
@@ -89,7 +87,7 @@ async function runai({
         ({ page, browser } = connection);
 
         // ── Langkah 1: Buka halaman ───────────────────────────────────────
-        await page.goto('https://www.google.com/search?udm=50&aep=11&hl=id&gl=id', {
+        await page.goto('https://g.ai?hl=id&gl=id', {
             waitUntil: 'domcontentloaded',
             timeout: 45000
         });
@@ -104,8 +102,9 @@ async function runai({
             let fileToUpload;
 
             if (imageBuffer) {
-                const tmpPath = path.join(os.tmpdir(), `myimage-${Date.now()}.jpg`);
-                fs.writeFileSync(tmpPath, imageBuffer);
+                const tmpPath = path.resolve(`${os.tmpdir()}/tmp/gemini-upload-${Date.now()}.jpg`);
+                console.log("Buffer length", imageBuffer.length, "and path", tmpPath)
+                fs.writeFileSync(tmpPath, Buffer.from(imageBuffer));
                 fileToUpload = tmpPath;
             } else if (imagePath) {
                 if (!fs.existsSync(imagePath)) {
@@ -188,7 +187,7 @@ async function runai({
     } catch (err) {
         console.error("Error selama proses:", err.message);
         // if (page) await page.screenshot({ path: 'gemini-error.png', fullPage: true });
-        return { success: false, error: err.message, stack: err.stack, es: err };
+        return { success: false, error: err.message };
     } finally {
         if (browser) {
             await browser.close();

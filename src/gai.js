@@ -55,12 +55,14 @@ async function runai({
     imagePath = null,
     imageBuffer = null,
     prompt = "",
-    timeout = 60000
+    timeout = 60000,
+    n
 } = {}) {
     console.log("Memulai proses query ke Google Gemini...");
 
     let browser;
     let page;
+    let fallback = {};
 
     try {
         const connection = await connect({
@@ -87,7 +89,7 @@ async function runai({
         ({ page, browser } = connection);
 
         // ── Langkah 1: Buka halaman ───────────────────────────────────────
-        await page.goto('https://g.ai?hl=id&gl=id', {
+        await page.goto('https://www.google.com/search?udm=50&aep=11&hl=id&gl=id', {
             waitUntil: 'domcontentloaded',
             timeout: 45000
         });

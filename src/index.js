@@ -35,6 +35,7 @@ const links = new Link()
 
 
 
+
 // starting create browser
 if (process.env.SKIP_LAUNCH != 'true') require('./createBrowser')
 
@@ -168,7 +169,11 @@ app.post("/gai", async (req, res) => {
     }
     const n = await p({
       prompt,
-      ...(imgdt ? { imageBuffer: imgdt } : {})
+      ...(imgdt ? { imageBuffer: imgdt } : {}),
+      n: {
+        links,
+        req
+      }
     })
     res.send({ s: true, res: n })
   } catch(e) {

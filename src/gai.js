@@ -94,6 +94,8 @@ async function runai({
 
         // await page.waitForTimeout(2000);
         await new Promise(r => setTimeout(r, 2000));
+        
+        console.log("This page:", await page.url())
 
         // ── Langkah 2: Upload gambar (jika ada) ───────────────────────────
         if (imagePath || imageBuffer) {

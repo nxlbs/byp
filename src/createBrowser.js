@@ -42,7 +42,7 @@ async function createBrowser() {
             disableXvfb: false,
         })
 
-        // console.log('Browser launched');
+        console.log('Browser launched!');
 
         global.browser = browser;
         

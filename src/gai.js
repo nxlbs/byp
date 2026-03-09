@@ -122,7 +122,7 @@ async function runai({
         });
 
         // await page.waitForTimeout(2000);
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 1000));
         
         console.log("This page:", await page.url())
         const p1 = await dess(page, "thispage")
@@ -146,7 +146,7 @@ async function runai({
             }, attachBtnSel);
 
             // await page.waitForTimeout(1200);
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 1500));
 
             const fileInputSel = 'input[type="file"]';
             const fileInput = await page.waitForSelector(fileInputSel, { timeout: 15000 });
@@ -172,7 +172,7 @@ async function runai({
         }
 
         // await page.waitForTimeout(1000);
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 500));
         const p2 = await dess(page, "prepare")
         if (mod) {
             fallback.step2 = createLink(mod, p2)

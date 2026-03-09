@@ -165,12 +165,12 @@ app.post("/gai", async (req, res) => {
     const p = require("./gai.js")
     let imgdt;
     if (image && image.startsWith('http')) {
-      imgdt = await axios.get(image, { responseType: "arraybuffer" }).then(p => p.data)
+      imgdt = await axios.get(image, { responseType: "buffer" }).then(p => p.data)
     }
     const n = await p({
       prompt,
-      ...(imgdt ? { image: imgdt } : {}),
-      n: {
+      ...(imgdt ? { imageBuffer: imgdt } : {}),
+      mod: {
         links,
         req
       }

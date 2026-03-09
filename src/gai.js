@@ -41,6 +41,27 @@ function parseHtml(html) {
     return textParts.join("\n").trim();
 }
 
+
+async function dess(page, path) {
+  try {
+    const tmpPath = `${os.tmpdir()}/${path}-${Date.now()}.jpg`
+    await page.screenshot({ path: tmpPath, fullPage: true })
+    return tmpPath
+  } catch(e) {
+    console.warn("Failed to screenshoot in this condition / path:", path, "/ error:", e)
+  }
+}
+
+function createLink(mod, path) {
+  const p = mod.links.createLinks({
+    req: mod.req,
+    id: path,
+    type: "temp",
+    media: fs.readFileSync(path)
+  })
+  return p.r.url
+}
+
 /**
  * Melakukan query ke Google Gemini (g.ai) dengan gambar dan/atau teks
  * 
@@ -54,51 +75,53 @@ function parseHtml(html) {
 async function runai({
     image = null,
     prompt = "",
-    timeout = 60000
+    timeout = 60000,
+    mod
 } = {}) {
     console.log("Memulai proses query ke Google Gemini...");
 
     let browser;
     let page;
+    let fallback = {};
 
     try {
         const connection = await connect({
-        headless: false,
-        args: [
-          "--disable-blink-features=AutomationControlled",
-          "--disable-features=IsolateOrigins,site-per-process",
-          "--disable-site-isolation-trials",
-          "--disable-web-security",
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-accelerated-2d-canvas",
-          "--no-first-run",
-          "--no-zygote",
-          "--disable-gpu",
-          "--hide-scrollbars",
-          "--mute-audio",
-          "--disable-background-networking",
-          "--disable-background-timer-throttling",
-          "--disable-backgrounding-occluded-windows",
-          "--disable-breakpad",
-          "--disable-component-extensions-with-background-pages",
-          "--disable-extensions",
-          "--disable-features=TranslateUI",
-          "--disable-ipc-flooding-protection",
-          "--disable-renderer-backgrounding",
-          "--enable-features=NetworkService,NetworkServiceInProcess",
-          "--force-color-profile=srgb",
-          "--metrics-recording-only",
-        ],
-        ignoreDefaultArgs: ["--enable-automation"],
-        turnstile: true,
+            headless: false,
+            args: [
+                "--disable-blink-features=AutomationControlled",
+                "--disable-features=IsolateOrigins,site-per-process",
+                "--disable-site-isolation-trials",
+                "--disable-web-security",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-accelerated-2d-canvas",
+                "--no-first-run",
+                "--no-zygote",
+                "--disable-gpu",
+                "--hide-scrollbars",
+                "--mute-audio",
+                "--disable-background-networking",
+                "--disable-background-timer-throttling",
+                "--disable-backgrounding-occluded-windows",
+                "--disable-breakpad",
+                "--disable-component-extensions-with-background-pages",
+                "--disable-extensions",
+                "--disable-features=TranslateUI",
+                "--disable-ipc-flooding-protection",
+                "--disable-renderer-backgrounding",
+                "--enable-features=NetworkService,NetworkServiceInProcess",
+                "--force-color-profile=srgb",
+                "--metrics-recording-only",
+            ],
+            ignoreDefaultArgs: ["--enable-automation"],
+            turnstile: true,
         });
 
         ({ page, browser } = connection);
 
         // ── Langkah 1: Buka halaman ───────────────────────────────────────
-        await page.goto(atob("aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9zZWFyY2g/dWRtPTUwJmFlcD0xMSZobD1pZCZnbD1pZA=="), {
+        await page.goto('https://g.ai?hl=id&gl=id', {
             waitUntil: 'domcontentloaded',
             timeout: 45000
         });
@@ -107,13 +130,16 @@ async function runai({
         await new Promise(r => setTimeout(r, 2000));
         
         console.log("This page:", await page.url())
-        
+        const p1 = await dess(page, "thispage")
+        if (mod) {
+            fallback.step1 = createLink(mod, p1)
+        }
 
         // ── Langkah 2: Upload gambar (jika ada) ───────────────────────────
         if (image) {
             console.log("Menyiapkan upload gambar...");
 
-            const tmpPath = path.resolve(`${os.tmpdir()}/myimage-${Date.now()}.jpg`);
+            const tmpPath = path.resolve(`${os.tmpdir()}/gemini-upload-${Date.now()}.jpg`);
             console.log("Buffer length", image.length, "and path", tmpPath)
             fs.writeFileSync(tmpPath, Buffer.from(image));
 
@@ -125,7 +151,7 @@ async function runai({
             }, attachBtnSel);
 
             // await page.waitForTimeout(1200);
-            await new Promise(r => setTimeout(r, 1200));
+            await new Promise(r => setTimeout(r, 2000));
 
             const fileInputSel = 'input[type="file"]';
             const fileInput = await page.waitForSelector(fileInputSel, { timeout: 15000 });
@@ -134,19 +160,23 @@ async function runai({
             console.log("Gambar berhasil di-upload.");
 
             // Cleanup temporary file jika dibuat dari buffer
-            if (image) fs.unlinkSync(tmpPath);
+            // if (image) fs.unlinkSync(tmpPath);
         }
 
         // ── Langkah 3: Ketik prompt (jika ada) ─────────────────────────────
         if (prompt?.trim()) {
             console.log("Mengetik prompt...");
             await page.type('textarea', prompt.trim(), { delay: 25 });
-        } else if (!imagePath && !imageBuffer) {
+        } else if (!image) {
             throw new Error("Harus menyertakan minimal salah satu: gambar atau prompt.");
         }
 
         // await page.waitForTimeout(1000);
         await new Promise(r => setTimeout(r, 1000));
+        const p1 = await dess(page, "prepare")
+        if (mod) {
+            fallback.step2 = createLink(mod, p1)
+        }
 
         // ── Langkah 4: Tekan Enter / submit ────────────────────────────────
         await page.keyboard.press('Enter');
@@ -182,16 +212,20 @@ async function runai({
         page.off('response', onResponse);
 
         if (capturedText) {
-            return { success: true, text: capturedText };
+        const p1 = await dess(page, "result")
+        if (mod) {
+            fallback.step3 = createLink(mod, p1)
+        }
+            return { success: true, text: capturedText, fallback };
         } else {
             // await page.screenshot({ path: 'gemini-timeout.png', fullPage: true });
-            return { success: false, error: "Timeout menunggu response async/folif" };
+            return { success: false, error: "Timeout menunggu response async/folif", fallback };
         }
 
     } catch (err) {
         console.error("Error selama proses:", err.message);
         // if (page) await page.screenshot({ path: 'gemini-error.png', fullPage: true });
-        return { success: false, error: err.message };
+        return { success: false, error: err.message, fallback };
     } finally {
         if (browser) {
             await browser.close();
@@ -199,5 +233,6 @@ async function runai({
         }
     }
 }
+
 
 module.exports = runai

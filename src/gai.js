@@ -150,7 +150,7 @@ async function runai({
 
             await fileInput.uploadFile(tmpPath);
             console.log("Gambar berhasil di-upload.");
-            // await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 1500));
             
             console.log("Menunggu load image")
             await page.waitForSelector('div[role="button"][aria-label="File"]', { timeout: 15000 });

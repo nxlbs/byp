@@ -173,9 +173,9 @@ async function runai({
 
         // await page.waitForTimeout(1000);
         await new Promise(r => setTimeout(r, 1000));
-        const p1 = await dess(page, "prepare")
+        const p2 = await dess(page, "prepare")
         if (mod) {
-            fallback.step2 = createLink(mod, p1)
+            fallback.step2 = createLink(mod, p2)
         }
 
         // ── Langkah 4: Tekan Enter / submit ────────────────────────────────
@@ -212,9 +212,9 @@ async function runai({
         page.off('response', onResponse);
 
         if (capturedText) {
-        const p1 = await dess(page, "result")
+        const p3 = await dess(page, "result")
         if (mod) {
-            fallback.step3 = createLink(mod, p1)
+            fallback.step3 = createLink(mod, p3)
         }
             return { success: true, text: capturedText, fallback };
         } else {

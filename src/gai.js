@@ -51,7 +51,7 @@ function parseHtml(html) {
  * @param {number} [options.timeout=60000]  - Timeout keseluruhan (ms)
  * @returns {Promise<{ success: boolean, text?: string, error?: string }>}
  */
-async function processGoogleGeminiQuery({
+async function runai({
     image = null,
     prompt = "",
     timeout = 60000
@@ -98,7 +98,7 @@ async function processGoogleGeminiQuery({
         ({ page, browser } = connection);
 
         // ── Langkah 1: Buka halaman ───────────────────────────────────────
-        await page.goto('https://g.ai?hl=id&gl=id', {
+        await page.goto(atob("aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9zZWFyY2g/dWRtPTUwJmFlcD0xMSZobD1pZCZnbD1pZA=="), {
             waitUntil: 'domcontentloaded',
             timeout: 45000
         });

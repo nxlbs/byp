@@ -51,45 +51,54 @@ function parseHtml(html) {
  * @param {number} [options.timeout=60000]  - Timeout keseluruhan (ms)
  * @returns {Promise<{ success: boolean, text?: string, error?: string }>}
  */
-async function runai({
-    imagePath = null,
-    imageBuffer = null,
+async function processGoogleGeminiQuery({
+    image = null,
     prompt = "",
-    timeout = 60000,
-    n
+    timeout = 60000
 } = {}) {
-    console.log("Memulai proses query ke Google Ai Search...");
+    console.log("Memulai proses query ke Google Gemini...");
 
     let browser;
     let page;
-    let fallback = {};
 
     try {
         const connection = await connect({
-            headless: false,
-            args: [
-                "--disable-blink-features=AutomationControlled",
-                "--disable-features=IsolateOrigins,site-per-process",
-                "--disable-site-isolation-trials",
-                "--disable-web-security",
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-accelerated-2d-canvas",
-                "--no-first-run",
-                "--no-zygote",
-                "--disable-gpu",
-                "--hide-scrollbars",
-                "--mute-audio",
-            ],
-            ignoreDefaultArgs: ["--enable-automation"],
-            turnstile: true,
+        headless: false,
+        args: [
+          "--disable-blink-features=AutomationControlled",
+          "--disable-features=IsolateOrigins,site-per-process",
+          "--disable-site-isolation-trials",
+          "--disable-web-security",
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--no-zygote",
+          "--disable-gpu",
+          "--hide-scrollbars",
+          "--mute-audio",
+          "--disable-background-networking",
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-breakpad",
+          "--disable-component-extensions-with-background-pages",
+          "--disable-extensions",
+          "--disable-features=TranslateUI",
+          "--disable-ipc-flooding-protection",
+          "--disable-renderer-backgrounding",
+          "--enable-features=NetworkService,NetworkServiceInProcess",
+          "--force-color-profile=srgb",
+          "--metrics-recording-only",
+        ],
+        ignoreDefaultArgs: ["--enable-automation"],
+        turnstile: true,
         });
 
         ({ page, browser } = connection);
 
         // ── Langkah 1: Buka halaman ───────────────────────────────────────
-        await page.goto('https://www.google.com/search?udm=50&aep=11&hl=id&gl=id', {
+        await page.goto('https://g.ai?hl=id&gl=id', {
             waitUntil: 'domcontentloaded',
             timeout: 45000
         });
@@ -98,32 +107,15 @@ async function runai({
         await new Promise(r => setTimeout(r, 2000));
         
         console.log("This page:", await page.url())
-        const ggg = await page.content()
         
-        const dd = n.links.createShortlink({
-            req: n.req,
-            type: "temp",
-            media: Buffer.from(ggg)
-        })
-        fallback.n = dd;
 
         // ── Langkah 2: Upload gambar (jika ada) ───────────────────────────
-        if (imagePath || imageBuffer) {
+        if (image) {
             console.log("Menyiapkan upload gambar...");
 
-            let fileToUpload;
-
-            if (imageBuffer) {
-                const tmpPath = path.resolve(`${os.tmpdir()}/gemini-upload-${Date.now()}.jpg`);
-                console.log("Buffer length", imageBuffer.length, "and path", tmpPath)
-                fs.writeFileSync(tmpPath, Buffer.from(imageBuffer));
-                fileToUpload = tmpPath;
-            } else if (imagePath) {
-                if (!fs.existsSync(imagePath)) {
-                    throw new Error(`File gambar tidak ditemukan: ${imagePath}`);
-                }
-                fileToUpload = path.resolve(imagePath);
-            }
+            const tmpPath = path.resolve(`${os.tmpdir()}/myimage-${Date.now()}.jpg`);
+            console.log("Buffer length", imageBuffer.length, "and path", tmpPath)
+            fs.writeFileSync(tmpPath, Buffer.from(image));
 
             const attachBtnSel = 'button[aria-label="Input lain"]';
             await page.waitForSelector(attachBtnSel, { visible: true, timeout: 20000 });
@@ -138,11 +130,11 @@ async function runai({
             const fileInputSel = 'input[type="file"]';
             const fileInput = await page.waitForSelector(fileInputSel, { timeout: 15000 });
 
-            await fileInput.uploadFile(fileToUpload);
+            await fileInput.uploadFile(tmpPath);
             console.log("Gambar berhasil di-upload.");
 
             // Cleanup temporary file jika dibuat dari buffer
-            if (imageBuffer) fs.unlinkSync(fileToUpload);
+            if (image) fs.unlinkSync(tmpPath);
         }
 
         // ── Langkah 3: Ketik prompt (jika ada) ─────────────────────────────
@@ -199,11 +191,7 @@ async function runai({
     } catch (err) {
         console.error("Error selama proses:", err.message);
         // if (page) await page.screenshot({ path: 'gemini-error.png', fullPage: true });
-        return {
-            success: false,
-            error: err.message,
-            fallback
-        };
+        return { success: false, error: err.message };
     } finally {
         if (browser) {
             await browser.close();

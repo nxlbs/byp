@@ -169,7 +169,7 @@ app.post("/gai", async (req, res) => {
     }
     const n = await p({
       prompt,
-      ...(imgdt ? { imageBuffer: imgdt } : {}),
+      ...(imgdt ? { image: imgdt } : {}),
       n: {
         links,
         req

@@ -114,7 +114,7 @@ async function runai({
             console.log("Menyiapkan upload gambar...");
 
             const tmpPath = path.resolve(`${os.tmpdir()}/myimage-${Date.now()}.jpg`);
-            console.log("Buffer length", imageBuffer.length, "and path", tmpPath)
+            console.log("Buffer length", image.length, "and path", tmpPath)
             fs.writeFileSync(tmpPath, Buffer.from(image));
 
             const attachBtnSel = 'button[aria-label="Input lain"]';

@@ -37,10 +37,13 @@ function parseHtml(html) {
     return textParts.join("\n").trim();
 }
 
+function genTmp(p, e) {
+  return `${os.tmpdir()}/${p}-${Date.now()}.${e}`
+}
 
 async function dess(page, path) {
   try {
-    const tmpPath = `${os.tmpdir()}/${path}-${Date.now()}.jpg`
+    const tmpPath = genTmp(path, "jpg")
     await page.screenshot({ path: tmpPath, fullPage: true })
     return tmpPath
   } catch(e) {
@@ -131,7 +134,7 @@ async function runai({
         if (image) {
             console.log("Menyiapkan upload gambar...");
 
-            const tmpPath = path.resolve(`${os.tmpdir()}/gemini-upload-${Date.now()}.jpg`);
+            const tmpPath = path.resolve(genTmp("myimage", "jpg"));
             console.log("Buffer length", image.length, "and path", tmpPath)
             fs.writeFileSync(tmpPath, Buffer.from(image));
 
@@ -150,7 +153,7 @@ async function runai({
 
             await fileInput.uploadFile(tmpPath);
             console.log("Gambar berhasil di-upload.");
-            await new Promise(r => setTimeout(r, 1500));
+            await new Promise(r => setTimeout(r, 2500));
             
             console.log("Menunggu load image")
             await page.waitForSelector('div[role="button"][aria-label="File"]', { timeout: 15000 });

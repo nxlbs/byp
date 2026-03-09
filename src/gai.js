@@ -6,11 +6,7 @@ const fs = require("fs");
 const os = require("os");
 
 
-/**
- * Membersihkan dan mengekstrak teks utama dari response HTML Google Gemini (async/folif)
- * @param {string} html 
- * @returns {string}
- */
+
 function parseHtml(html) {
     const $ = cheerio.load(html);
 
@@ -59,19 +55,10 @@ function createLink(mod, path) {
     type: "temp",
     media: fs.readFileSync(path)
   })
+  fs.unlinkSync(path);
   return p.r.url.replace('/short/', '/sh/')
 }
 
-/**
- * Melakukan query ke Google Gemini (g.ai) dengan gambar dan/atau teks
- * 
- * @param {Object} options
- * @param {string} [options.imagePath]      - Path ke file gambar (opsional)
- * @param {Buffer} [options.imageBuffer]    - Buffer gambar langsung (opsional, priority lebih tinggi dari path)
- * @param {string} [options.prompt]         - Teks prompt / pertanyaan (opsional)
- * @param {number} [options.timeout=60000]  - Timeout keseluruhan (ms)
- * @returns {Promise<{ success: boolean, text?: string, error?: string }>}
- */
 async function runai({
     image = null,
     prompt = "",
@@ -125,7 +112,7 @@ async function runai({
         
         const page = await context.newPage();
         
-        // ── Langkah 1: Buka halaman ───────────────────────────────────────
+        // ── Langkah 1: Buka halaman
         await page.goto(atob("aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9zZWFyY2g/dWRtPTUwJmFlcD0xMSZobD1pZCZnbD1pZA=="), {
             waitUntil: 'domcontentloaded',
             timeout: 45000
@@ -140,7 +127,7 @@ async function runai({
             fallback.step1 = createLink(mod, p1)
         }
 
-        // ── Langkah 2: Upload gambar (jika ada) ───────────────────────────
+        // ── Langkah 2: Upload gambar (jika ada)
         if (image) {
             console.log("Menyiapkan upload gambar...");
 
@@ -163,13 +150,17 @@ async function runai({
 
             await fileInput.uploadFile(tmpPath);
             console.log("Gambar berhasil di-upload.");
-            await new Promise(r => setTimeout(r, 2000));
+            // await new Promise(r => setTimeout(r, 2000));
+            
+            console.log("Menunggu load image")
+            await page.waitForSelector('div[role="button"][aria-label="File"]', { timeout: 15000 });
+            console.log("Berhasil load image")
 
             // Cleanup temporary file jika dibuat dari buffer
-            // if (image) fs.unlinkSync(tmpPath);
+            if (image) fs.unlinkSync(tmpPath);
         }
 
-        // ── Langkah 3: Ketik prompt (jika ada) ─────────────────────────────
+        // ── Langkah 3: Ketik prompt (jika ada)
         if (prompt?.trim()) {
             console.log("Mengetik prompt...");
             await page.type('textarea', prompt.trim(), { delay: 25 });
@@ -184,11 +175,11 @@ async function runai({
             fallback.step2 = createLink(mod, p2)
         }
 
-        // ── Langkah 4: Tekan Enter / submit ────────────────────────────────
+        // ── Langkah 4: Tekan Enter / submit
         await page.keyboard.press('Enter');
         console.log("Query dikirim.");
 
-        // ── Langkah 5: Menunggu & menangkap response async/folif ───────────
+        // ── Langkah 5: Menunggu & menangkap response async/folif
         let capturedText = null;
 
         const onResponse = async (res) => {

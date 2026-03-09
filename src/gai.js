@@ -55,11 +55,11 @@ async function dess(page, path) {
 function createLink(mod, path) {
   const p = mod.links.createShortlink({
     req: mod.req,
-    id: path,
+    id: path.split("/").pop(),
     type: "temp",
     media: fs.readFileSync(path)
   })
-  return p.r.url
+  return p.r.url.replace('/short/', '/sh/')
 }
 
 /**

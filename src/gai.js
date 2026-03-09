@@ -153,39 +153,36 @@ async function runai({
 
             await fileInput.uploadFile(tmpPath);
             console.log("Gambar berhasil di-upload.");
-            // await new Promise(r => setTimeout(r, 2500));
-            
-            // console.log("Menunggu load image")
+
             // await page.waitForSelector('div[role="button"][aria-label="File"]', { timeout: 15000 });
             console.log("Menunggu load image")
             
-        let capturedImg = null;
-
-        const onResponse2 = async (res) => {
-            if (res.url().includes('v1/crupload')) {
-                try {
-                    capturedImg = true
-                } catch (e) {
-                    console.warn("Gagal load response crupload:", e);
+            let capturedImg = null;
+            const onResponse2 = async (res) => {
+                if (res.url().includes('v1/crupload')) {
+                    try {
+                        console.log("Terdeteksi load crupload")
+                        capturedImg = true
+                    } catch (e) {
+                        console.warn("Gagal load response crupload:", e);
+                    }
                 }
+            };
+            
+            page.on('response', onResponse2);
+            const start2 = Date.now();
+            while (Date.now() - start2 < timeout) {
+                if (capturedImg) break;
+                await new Promise(r => setTimeout(r, 800));
             }
-        };
-
-        page.on('response', onResponse2);
-
-        const start2 = Date.now();
-        while (Date.now() - start2 < timeout) {
-            if (capturedImg) break;
-            await new Promise(r => setTimeout(r, 800));
-        }
-
-        page.off('response', onResponse2);
-        if (!capturedImg) {
-         throw new Error("Gagal untuk upload")
-        } else {
-          console.log("Selesai load image")
-          await new Promise(r => setTimeout(r, 1000));
-        }
+            page.off('response', onResponse2);
+            
+            if (!capturedImg) {
+                throw new Error("Gagal untuk upload")
+            } else {
+                console.log("Selesai load image")
+                await new Promise(r => setTimeout(r, 1000));
+            }
         }
 
         // ── Langkah 3: Ketik prompt (jika ada)
@@ -237,13 +234,16 @@ async function runai({
         page.off('response', onResponse);
 
         if (capturedText) {
-        const p3 = await dess(page, "result")
-        if (mod) {
-            fallback.step3 = createLink(mod, p3)
-        }
+            const p3 = await dess(page, "result")
+            if (mod) {
+                fallback.step3 = createLink(mod, p3)
+            }
             return { success: true, text: capturedText, fallback };
         } else {
-            // await page.screenshot({ path: 'gemini-timeout.png', fullPage: true });
+            const p3 = await dess(page, "timeout")
+            if (mod) {
+                fallback.step4 = createLink(mod, p3)
+            }
             return { success: false, error: "Timeout menunggu response async/folif", fallback };
         }
 

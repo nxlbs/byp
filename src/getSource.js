@@ -40,12 +40,12 @@ function getSource({ url, proxy }) {
             const html = await page.content();
             
 // Screenshot seluruh halaman (full page)
-    await page.screenshot({
-      path: 'screenshot-full.png',
-      fullPage: true,          // capture seluruh halaman meski perlu scroll
-      type: 'png',             // atau 'jpeg' jika ingin ukuran lebih kecil
-      // quality: 80,          // hanya untuk jpeg (0-100)
-    });
+    // await page.screenshot({
+      // path: 'screenshot-full.png',
+      // fullPage: true,          // capture seluruh halaman meski perlu scroll
+      // type: 'png',             // atau 'jpeg' jika ingin ukuran lebih kecil
+      // // quality: 80,          // hanya untuk jpeg (0-100)
+    // });
             
             await context.close();
             isResolved = true;

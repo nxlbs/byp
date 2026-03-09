@@ -17,7 +17,7 @@ const up = require("../lib/uploader")
 
 global.browserLength = 0
 global.browserLimit = Number(process.env.browserLimit) || 20
-global.timeOut = Number(process.env.timeOut || 60000)
+global.timeOut = Number(process.env.timeOut || 90000)
 
 app.use(bodyParser.json({}))
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -190,5 +190,6 @@ app.get("/", (req, res) => {
 
 app.use((req, res) => {
   res.status(404).json({ code: 404, message: 'Not Found' })
+  res.status(500).json({ code: 500, message: 'Server Error' })
 })
 

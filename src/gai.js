@@ -80,46 +80,51 @@ async function runai({
 } = {}) {
     console.log("Memulai proses query ke Google Gemini...");
 
-    let browser;
+    let context;
     let page;
     let fallback = {};
 
     try {
-        const connection = await connect({
-            headless: false,
-            args: [
-                "--disable-blink-features=AutomationControlled",
-                "--disable-features=IsolateOrigins,site-per-process",
-                "--disable-site-isolation-trials",
-                "--disable-web-security",
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-accelerated-2d-canvas",
-                "--no-first-run",
-                "--no-zygote",
-                "--disable-gpu",
-                "--hide-scrollbars",
-                "--mute-audio",
-                "--disable-background-networking",
-                "--disable-background-timer-throttling",
-                "--disable-backgrounding-occluded-windows",
-                "--disable-breakpad",
-                "--disable-component-extensions-with-background-pages",
-                "--disable-extensions",
-                "--disable-features=TranslateUI",
-                "--disable-ipc-flooding-protection",
-                "--disable-renderer-backgrounding",
-                "--enable-features=NetworkService,NetworkServiceInProcess",
-                "--force-color-profile=srgb",
-                "--metrics-recording-only",
-            ],
-            ignoreDefaultArgs: ["--enable-automation"],
-            turnstile: true,
-        });
+        // const connection = await connect({
+            // headless: false,
+            // args: [
+                // "--disable-blink-features=AutomationControlled",
+                // "--disable-features=IsolateOrigins,site-per-process",
+                // "--disable-site-isolation-trials",
+                // "--disable-web-security",
+                // "--no-sandbox",
+                // "--disable-setuid-sandbox",
+                // "--disable-dev-shm-usage",
+                // "--disable-accelerated-2d-canvas",
+                // "--no-first-run",
+                // "--no-zygote",
+                // "--disable-gpu",
+                // "--hide-scrollbars",
+                // "--mute-audio",
+                // "--disable-background-networking",
+                // "--disable-background-timer-throttling",
+                // "--disable-backgrounding-occluded-windows",
+                // "--disable-breakpad",
+                // "--disable-component-extensions-with-background-pages",
+                // "--disable-extensions",
+                // "--disable-features=TranslateUI",
+                // "--disable-ipc-flooding-protection",
+                // "--disable-renderer-backgrounding",
+                // "--enable-features=NetworkService,NetworkServiceInProcess",
+                // "--force-color-profile=srgb",
+                // "--metrics-recording-only",
+            // ],
+            // ignoreDefaultArgs: ["--enable-automation"],
+            // turnstile: true,
+        // });
 
-        ({ page, browser } = connection);
-
+        // ({ page, browser } = connection);
+        
+        context = await global.browser.createBrowserContext().catch(_ => null);
+        if (!context) throw new Error("Failed to create browser context");
+        
+        const page = await context.newPage();
+        
         // ── Langkah 1: Buka halaman ───────────────────────────────────────
         await page.goto(atob("aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9zZWFyY2g/dWRtPTUwJmFlcD0xMSZobD1pZCZnbD1pZA=="), {
             waitUntil: 'domcontentloaded',
@@ -227,8 +232,8 @@ async function runai({
         // if (page) await page.screenshot({ path: 'gemini-error.png', fullPage: true });
         return { success: false, error: err.message, fallback };
     } finally {
-        if (browser) {
-            await browser.close();
+        if (context) {
+            await context.close();
             console.log("Browser ditutup.");
         }
     }

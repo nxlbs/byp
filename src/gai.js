@@ -163,6 +163,7 @@ async function runai({
 
             await fileInput.uploadFile(tmpPath);
             console.log("Gambar berhasil di-upload.");
+            await new Promise(r => setTimeout(r, 2000));
 
             // Cleanup temporary file jika dibuat dari buffer
             // if (image) fs.unlinkSync(tmpPath);

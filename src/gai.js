@@ -121,7 +121,7 @@ async function runai({
         ({ page, browser } = connection);
 
         // ── Langkah 1: Buka halaman ───────────────────────────────────────
-        await page.goto('https://g.ai?hl=id&gl=id', {
+        await page.goto(atob("aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9zZWFyY2g/dWRtPTUwJmFlcD0xMSZobD1pZCZnbD1pZA=="), {
             waitUntil: 'domcontentloaded',
             timeout: 45000
         });

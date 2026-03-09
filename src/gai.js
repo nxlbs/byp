@@ -53,7 +53,7 @@ async function dess(page, path) {
 }
 
 function createLink(mod, path) {
-  const p = mod.links.createLinks({
+  const p = mod.links.createShortlink({
     req: mod.req,
     id: path,
     type: "temp",

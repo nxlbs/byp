@@ -153,14 +153,39 @@ async function runai({
 
             await fileInput.uploadFile(tmpPath);
             console.log("Gambar berhasil di-upload.");
-            await new Promise(r => setTimeout(r, 2500));
+            // await new Promise(r => setTimeout(r, 2500));
             
+            // console.log("Menunggu load image")
+            // await page.waitForSelector('div[role="button"][aria-label="File"]', { timeout: 15000 });
             console.log("Menunggu load image")
-            await page.waitForSelector('div[role="button"][aria-label="File"]', { timeout: 15000 });
-            console.log("Berhasil load image")
+            
+        let capturedImg = null;
 
-            // Cleanup temporary file jika dibuat dari buffer
-            if (image) fs.unlinkSync(tmpPath);
+        const onResponse2 = async (res) => {
+            if (res.url().includes('v1/crupload')) {
+                try {
+                    capturedImg = true
+                } catch (e) {
+                    console.warn("Gagal load response crupload:", e);
+                }
+            }
+        };
+
+        page.on('response', onResponse2);
+
+        const start2 = Date.now();
+        while (Date.now() - start2 < timeout) {
+            if (capturedImg) break;
+            await new Promise(r => setTimeout(r, 800));
+        }
+
+        page.off('response', onResponse2);
+        if (!capturedImg) {
+         throw new Error("Gagal untuk upload")
+        } else {
+          console.log("Selesai load image")
+          await new Promise(r => setTimeout(r, 1000));
+        }
         }
 
         // ── Langkah 3: Ketik prompt (jika ada)
